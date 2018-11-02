@@ -665,5 +665,13 @@ UE.I18N['zh-cn'] = {
     'autosave': {
         'saving':'保存中...',
         'success':'本地保存成功'
+    },
+  'controlinput': {
+    'static':{
+      '_controlname':'控件名称',
+      '_defaultvalue': '默认值',
+      '_controlwidth': '宽　度',
+      'success':'本地保存成功'
     }
+  }
 };

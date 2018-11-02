@@ -1,157 +1,163 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title></title>
-    <script type="text/javascript" src="../internal.js"></script>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=1.3&services=true&s=1"></script>
-    <style type="text/css">
-        .content{
-            width: 600px;
-            height: 415px;
-            margin: 20px;
-        }
-        .content table{width: 100%}
-        .content table td{vertical-align: middle;}
-        #city,#address{
-            height: 26px;
-            background: #FFF;
-            border: 1px solid #ccc;
-            line-height: 26px;
-            border-radius: 5px;
-            margin-left: 5px;
-        }
-        #city{width:76px}
-        #address{width:178px}
-        #is_dynamic_label span{vertical-align:middle;margin: 3px 0px 3px 3px;}
-        #is_dynamic_label input{vertical-align:middle;margin: 3px 3px 3px 50px;}
-        #search {
-            display: block;
-            text-align: center;
-            line-height: 30px;
-            text-decoration: none;
-            height: 30px;
-            width: 78px;
-            border: 0;
-            color: #838383;
-            background-color: #3498db;
-            border-radius: 5px;
-            color: #fff;
-        }
-    </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title></title>
+  <script type="text/javascript" src="../internal.js"></script>
+  <script type="text/javascript" src="../extend.js"></script>
+  <script type="text/javascript" src="../sha1.js"></script>
+  <style type="text/css">
+    .content{
+      height: 415px;
+      margin: 20px;
+    }
+    .content table{width: 100%}
+    .content table td{vertical-align: middle; padding: 5px;}
+
+    input{
+      height: 26px;
+      background: #FFF;
+      border: 1px solid #ccc;
+      line-height: 26px;
+      border-radius: 5px;
+      margin-left: 5px;
+    }
+  </style>
 </head>
 <body>
 <div class="content">
-    <table>
-        <tr>
-            <td><var id="lang_city"></var>:</td>
-            <td><input id="city" type="text" /></td>
-            <td><var id="lang_address"></var>:</td>
-            <td><input id="address" type="text" value="" /></td>
-            <td><a href="javascript:doSearch()" class="button" id="search"><var id="lang_search"></var></a></td>
-            <td><label id="is_dynamic_label" for="is_dynamic"><input id="is_dynamic" type="checkbox" name="is_dynamic" /><span><var id="lang_dynamicmap"></var></span></label></td>
-        </tr>
-    </table>
-    <div style="width:100%;height:363px;margin:20px auto;border:none" id="container"></div>
+  <table>
+    <tr>
+      <td><var id="_controlname"></var>:</td>
+      <td><input id="controlname" type="text" /></td>
+    </tr>
+    <tr>
+      <td><var id="_defaultvalue"></var>:</td>
+      <td><input id="defaultvalue" type="text" /></td>
+    </tr>
+    <tr>
+      <td><var id="_controlwidth"></var>:</td>
+      <td><input id="controlwidth" type="text" /></td>
+    </tr>
+  </table>
+  <div style="width:100%;height:363px;margin:20px auto;border:none" id="container"></div>
 
 </div>
 <script type="text/javascript">
-    var map = new BMap.Map("container"),marker,point,styleStr;
-    map.enableScrollWheelZoom();
-    map.enableContinuousZoom();
-    function doSearch(){
-        if (!document.getElementById('city').value) {
-            alert(lang.cityMsg);
-            return;
-        }
-        var search = new BMap.LocalSearch(document.getElementById('city').value, {
-            onSearchComplete: function (results){
-                if (results && results.getNumPois()) {
-                    var points = [];
-                    for (var i=0; i<results.getCurrentNumPois(); i++) {
-                        points.push(results.getPoi(i).point);
-                    }
-                    if (points.length > 1) {
-                        map.setViewport(points);
-                    } else {
-                        map.centerAndZoom(points[0], 13);
-                    }
-                    point = map.getCenter();
-                    marker.setPosition(point);
-                } else {
-                    alert(lang.errorMsg);
-                }
-            }
-        });
-        search.search(document.getElementById('address').value || document.getElementById('city').value);
-    }
-    //获得参数
-    function getPars(str,par){
-        var reg = new RegExp(par+"=((\\d+|[.,])*)","g");
-        return reg.exec(str)[1];
-    }
-    function init(){
-        var mapNode = editor.selection.getRange().getClosedNode(),
-            isMapImg = mapNode && /api[.]map[.]baidu[.]com/ig.test(mapNode.getAttribute("src")),
-            isMapIframe = mapNode && domUtils.hasClass(mapNode, 'ueditor_baidumap');
-        if(isMapImg || isMapIframe){
-            var url, centerPos, markerPos;
-            if(isMapIframe) {
-                url = decodeURIComponent(mapNode.getAttribute("src"));
-                $G('is_dynamic').checked = true;
-                styleStr = mapNode.style.cssText;
-            } else {
-                url = mapNode.getAttribute("src");
-                styleStr = mapNode.style.cssText;
-            }
 
-            centerPos = getPars(url,"center").split(",");
-            markerPos = getPars(url, "mMarkerarkers").split(",");
-            point = new BMap.Point(Number(centerPos[0]),Number(centerPos[1]));
-            marker = new BMap.Marker(new BMap.Point(Number(markerPos[0]), Number(markerPos[1])));
-            map.addControl(new BMap.NavigationControl());
-            map.centerAndZoom(point, Number(getPars(url,"zoom")));
+</script>
+<script type="text/javascript">
+
+  var oNode = null,thePlugins = 'controlinput';
+  console.log(thePlugins)
+  window.onload = function() {
+    if( UE.plugins[thePlugins].editdom ){
+      oNode = UE.plugins[thePlugins].editdom;
+      var gValue = '';
+      if(oNode.getAttribute('value'))
+        gValue = oNode.getAttribute('value').replace(/&quot;/g,"\"");
+      var gTitle=oNode.getAttribute('title').replace(/&quot;/g,"\""),gWidth=oNode.getAttribute('cwidth');
+      gValue = gValue==null ? '' : gValue;
+      gTitle = gTitle==null ? '' : gTitle;
+      $G('defaultvalue').value = gValue;
+      $G('controlname').value = gTitle;
+      $G('controlwidth').value = gWidth;
+    }
+
+    // 去除控件名称中的半角字符
+    // 验证名称是否重复
+    $G('controlname').onchange = function() {
+
+      // 去除控件名称中的半角字符
+      var orgname = $G('controlname').value;
+      orgname = orgname.replace(/[\u0000-\u002F]/gi, '').replace(/[\u003a-\u0040]/gi, '').replace(/[\u005b-\u0060]/gi, '').replace(/[\u007b-\u00ff]/gi, '');
+      $G('controlname').value = orgname;
+
+      // 验证名称是否重复
+      // if (orgname) {
+      //
+      //   for (var i = 0; i < UE.controls.length; i++) {
+      //     var name = UE.controls[i];
+      //     if(name == orgname) {
+      //       alert('控件名称重复，请重新输入！');
+      //       $(this).val('');
+      //       return false;
+      //     }
+      //   }
+      // }
+    }
+
+    if(null != null) {
+      var orgname = oNode.getAttribute('title').replace(/&quot;/g, "\"");
+      for (var i = 0; i < UE.controls.length; i++) {
+
+        var name = UE.controls[i];
+        if (name == orgname) {
+          UE.controls.splice(i, 1, '');
+          break;
+        }
+      }
+    }
+  }
+  dialog.oncancel = function () {
+    if( UE.plugins[thePlugins].editdom ) {
+      delete UE.plugins[thePlugins].editdom;
+    }
+  };
+  dialog.onok = function (){
+    if($G('controlname').value==''){
+      alert('请输入控件名称');
+      return false;
+    }
+    var gValue=$G('defaultvalue').value.replace(/\"/g,"&quot;"),gTitle=$G('controlname').value.replace(/\"/g,"&quot;"),gWidth=$G('controlwidth').value;
+
+    if( !oNode ) {
+      try {
+        oNode = createElement('input',getComplexRandomID('32'));
+        oNode.setAttribute('type','text');
+        oNode.setAttribute('title', gTitle);
+        oNode.setAttribute('agentitemid', hex_sha1(gTitle));
+        oNode.setAttribute('value',gValue);
+        oNode.setAttribute('name', getComplexRandomID(32));
+        oNode.setAttribute('plugins',thePlugins);
+
+        if( gWidth != '' ) {
+          oNode.style.width = gWidth+ 'px';
+          oNode.setAttribute('cwidth',gWidth );
         }else{
-            point = new BMap.Point(116.404, 39.915);    // 创建点坐标
-            marker = new BMap.Marker(point);
-            map.addControl(new BMap.NavigationControl());
-            map.centerAndZoom(point, 10);                     // 初始化地图,设置中心点坐标和地图级别。
+          oNode.style.width = '';
+          oNode.setAttribute('cwidth', '');
         }
-        marker.enableDragging();
-        map.addOverlay(marker);
-    }
-    init();
-    document.getElementById('address').onkeydown = function (evt){
-        evt = evt || event;
-        if (evt.keyCode == 13) {
-            doSearch();
-        }
-    };
-    dialog.onok = function (){
-        var center = map.getCenter();
-        var zoom = map.zoomLevel;
-        var size = map.getSize();
-        var mapWidth = size.width;
-        var mapHeight = size.height;
-        var point = marker.getPosition();
+        oNode.readOnly = true
 
-        if($G('is_dynamic').checked) {
-            var URL = editor.options.UEDITOR_HOME_URL,
-                url = [URL + (/\/$/.test(URL) ? '':'/') + "dialogs/map/show.html" +
-                    '#center=' + center.lng + ',' + center.lat,
-                    '&zoom=' + zoom,
-                    '&width=' + mapWidth,
-                    '&height=' + mapHeight,
-                    '&markers=' + point.lng + ',' + point.lat,
-                    '&markerStyles=' + 'l,A'].join('');
-            editor.execCommand('inserthtml', '<iframe class="ueditor_baidumap" src="' + url + '"' + (styleStr ? ' style="' + styleStr + '"' :'') + ' frameborder="0" width="' + (mapWidth+4) + '" height="' + (mapHeight+4) + '"></iframe>');
-        } else {
-            var url = "https://api.map.baidu.com/staticimage?center=" + center.lng + ',' + center.lat +
-                    "&zoom=" + zoom + "&width=" + size.width + '&height=' + size.height + "&markers=" + point.lng + ',' + point.lat;
-                    editor.execCommand('inserthtml', '<img width="'+ size.width +'" height="'+ size.height +'" src="' + url + '"' + (styleStr ? ' style="' + styleStr + '"' :'') + '/>');
+        editor.execCommand('insertHtml',oNode.outerHTML, true);
+      } catch (e) {
+        try {
+          console.log(e)
+          UE.getEditor('fe-ueditor').execCommand('error');
+        } catch ( e ) {
+          alert('控件异常，如果一直出现该提示，请联系系统管理员！');
         }
-    };
-    document.getElementById("address").focus();
+        return false;
+      }
+    } else {
+
+      oNode.setAttribute('title', gTitle);
+      oNode.setAttribute('agentitemid', hex_sha1(gTitle));
+      oNode.setAttribute('value', $G('defaultvalue').value);
+
+      if( gWidth != '' ) {
+        oNode.style.width = gWidth+ 'px';
+        oNode.setAttribute('cwidth',gWidth );
+      }else{
+        oNode.style.width = '';
+        oNode.setAttribute('cwidth', '');
+      }
+      oNode.readOnly = true
+
+      delete UE.plugins[thePlugins].editdom;
+    }
+  };
 </script>
 
 

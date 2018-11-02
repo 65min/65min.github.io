@@ -7,7 +7,7 @@
  *UE.getEditor('myFormDesign',{
  *          customtoolbar:true,//是否显示，设计器的清单 tool
  */
-UE.formDesignUrl = 'formdesign';
+UE.formDesignUrl = 'dialogs';
 
 // 运算控件Array
 UE.computes = new Array();
@@ -107,11 +107,11 @@ UE.plugins['controlinput'] = function () {
   me.commands[thePlugins] = {
     execCommand:function () {
       var dialog = new UE.ui.Dialog({
-        iframeUrl:this.options.UEDITOR_HOME_URL + UE.formDesignUrl+'/controlinput.html?r=' + Date.parse(new Date().toString())+parseInt(100*Math.random()),
+        iframeUrl:this.options.UEDITOR_HOME_URL + UE.formDesignUrl+'/controlinput/controlinput.html?r=' + Date.parse(new Date().toString())+parseInt(100*Math.random()),
         name:thePlugins,
         editor:this,
         title: '文本框',
-        cssRules:"width:600px;height:380px;",
+        cssRules:"width:360px;height:280px;",
         buttons:[
           {
             className:'edui-okbutton',
@@ -135,7 +135,7 @@ UE.plugins['controlinput'] = function () {
   var popup = new baidu.editor.ui.Popup( {
     editor:this,
     content: '',
-    className: 'edui-bubble',
+    className: 'edui-for-controlinput',
     _edittext: function () {
       baidu.editor.plugins[thePlugins].editdom = popup.anchorEl;
       me.execCommand(thePlugins);

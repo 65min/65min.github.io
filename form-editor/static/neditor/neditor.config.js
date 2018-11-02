@@ -513,6 +513,7 @@
             hr: [],
             i: ['class', 'style'],
             img: ['src', 'alt', 'title', 'width', 'height', 'id', '_src', '_url', 'loadingclass', 'class', 'data-latex'],
+            input: ['name', 'agentitemid', 'style', 'id', 'value', 'cwidth', 'type', 'title', 'plugins', 'readonly'],
             ins: ['datetime'],
             li: ['class', 'style'],
             mark: [],
